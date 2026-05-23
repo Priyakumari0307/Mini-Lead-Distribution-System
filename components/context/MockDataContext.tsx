@@ -210,7 +210,8 @@ export function MockDataProvider({ children }: { children: React.ReactNode }) {
     fetchData().then(() => setInitialized(true));
 
     // Connect to backend Socket.IO server
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+    const rawBackendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+    const backendUrl = rawBackendUrl.replace(/\/$/, "");
     const socket = io(backendUrl);
 
     socket.on("connect", () => {
