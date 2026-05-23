@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  SALES
+}
+
+enum LeadStatus {
+  PENDING
+  ALLOCATED
+  DUPLICATE
+  REJECTED
+}
+
+enum AllocationType {
+  AUTO
+  MANUAL
+}
+
+model Counter {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String @unique
+  value Int    @default(0)
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(SALES)
+  createdAt DateTime @default(now())
+}
+
+model Provider {
+  id                 String          @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  category           String
+  monthlyQuota       Int             @default(10)
+  allocatedThisMonth Int             @default(0)
+  isMandatory        Boolean         @default(false)
+  isActive           Boolean         @default(true)
+  email              String
+  phone              String
+  webhookUrl         String?
+  lastAllocatedAt    DateTime?
+  createdAt          DateTime        @default(now())
+  leadIds            String[]        @db.ObjectId
+  leads              Lead[]          @relation(fields: [leadIds], references: [id])
+  allocationLogs     AllocationLog[]
+  webhookLogs        WebhookLog[]
+}
+
+model Lead {
+  id                 String          @id @default(auto()) @map("_id") @db.ObjectId
+  leadNumber         Int             @unique
+  customerName       String
+  phone              String
+  email              String
+  category           String
+  location           String
+  description        String
+  status             LeadStatus      @default(PENDING)
+  providerIds        String[]        @db.ObjectId
+  providers          Provider[]      @relation(fields: [providerIds], references: [id])
+  createdAt          DateTime        @default(now())
+  allocationLogs     AllocationLog[]
+  duplicateRelations DuplicateLead[] @relation("NewLead")
+  originalRelations  DuplicateLead[] @relation("OriginalLead")
+  webhookLogs        WebhookLog[]
+
+  @@unique([phone, category])
+}
+
+model PaymentTransaction {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  transactionId String   @unique
+  providerId    String   @db.ObjectId
+  createdAt     DateTime @default(now())
+}
+
+model AllocationLog {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  leadId         String         @db.ObjectId
+  lead           Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  providerId     String?        @db.ObjectId
+  provider       Provider?      @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  allocationType AllocationType @default(AUTO)
+  reason         String
+  createdAt      DateTime       @default(now())
+}
+
+model DuplicateLead {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  leadId            String   @db.ObjectId
+  lead              Lead     @relation("NewLead", fields: [leadId], references: [id], onDelete: Cascade)
+  duplicateOfLeadId String   @db.ObjectId
+  duplicateOfLead   Lead     @relation("OriginalLead", fields: [duplicateOfLeadId], references: [id], onDelete: Cascade)
+  reason            String   @default("")
+  createdAt         DateTime @default(now())
+}
+
+model WebhookLog {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  providerId String   @db.ObjectId
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  leadId     String   @db.ObjectId
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  payload    String   // Store serialized json payload
+  response   String?
+  status     String   // e.g. "SUCCESS", "FAILED"
+  createdAt  DateTime @default(now())
+}

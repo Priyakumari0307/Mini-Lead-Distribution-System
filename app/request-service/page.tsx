@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, ShieldCheck, Zap, Award, Sparkles, Building2, UserCheck } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Zap, Award, Sparkles, Building2, UserCheck, ArrowLeft } from "lucide-react";
 import { useMockData } from "@/components/context/MockDataContext";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Select } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function LeadSubmissionPage() {
+export default function RequestServicePage() {
   const router = useRouter();
   const { submitLead } = useMockData();
   const { toast } = useToast();
@@ -44,7 +44,7 @@ export default function LeadSubmissionPage() {
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
     } else if (!phoneRegex.test(formData.phone.replace(/\D/g, ""))) {
-      newErrors.phone = "Enter a valid 10-digit mobile number";
+      newErrors.phone = "Enter a valid 10-digit mobile number starting with 6-9";
     }
 
     // Email validation
@@ -55,7 +55,7 @@ export default function LeadSubmissionPage() {
       newErrors.email = "Enter a valid email address";
     }
 
-    if (!formData.location.trim()) newErrors.location = "Location is required";
+    if (!formData.location.trim()) newErrors.location = "City/Location is required";
     if (!formData.description.trim()) newErrors.description = "Requirement details are required";
 
     setErrors(newErrors);
@@ -108,7 +108,7 @@ export default function LeadSubmissionPage() {
       if (err.response && err.response.data && err.response.data.message) {
         errorMsg = err.response.data.message;
       }
-      
+
       toast({
         title: "Submission Failed",
         description: errorMsg,
@@ -120,127 +120,84 @@ export default function LeadSubmissionPage() {
   return (
     <div className="min-h-screen bg-gradient-mesh flex flex-col justify-between py-6 md:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       
-      {/* Top Floating Logo / Admin Access */}
+      {/* Top Floating Logo */}
       <nav className="max-w-7xl w-full mx-auto flex items-center justify-between mb-8 md:mb-12 z-10">
-        <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-white">
+        <button
+          onClick={() => router.push("/")}
+          className="flex items-center gap-2 font-bold text-slate-800 dark:text-white cursor-pointer hover:opacity-80 transition-opacity"
+        >
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20">
             L
           </div>
           <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
             LeadFlow
           </span>
+        </button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/login")}
+            className="border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl"
+          >
+            Admin Portal
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.push("/login")}
-          className="border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl"
-        >
-          Admin Portal
-        </Button>
       </nav>
 
       {/* Main Grid */}
       <main className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center flex-1 z-10">
         
-        {/* Left column: Illustration & Badges */}
-        <div className="lg:col-span-6 flex flex-col space-y-6 md:space-y-8 text-left">
+        {/* Left column: Info */}
+        <div className="lg:col-span-5 flex flex-col space-y-6 text-left">
+          <button
+            onClick={() => router.push("/")}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer self-start transition-colors"
+          >
+            <ArrowLeft className="h-4.5 w-4.5" />
+            Back to Home
+          </button>
+
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold self-start border border-blue-200 dark:border-blue-800/40">
             <Sparkles className="h-3.5 w-3.5" />
-            Direct Lead Distribution System
+            3-Provider Allocation System
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-            Get the Best <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Service Providers</span> Near You
+            Submit a <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Service Request</span>
           </h2>
           
-          <p className="text-sm sm:text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-lg leading-relaxed">
-            Submit your project details and our intelligent distribution engine will instantly pair you with the highest-rated active provider matching your category.
+          <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-lg leading-relaxed">
+            Our distribution engine will route your request directly to exactly 3 matching provider partners in the system according to fair-rotation and mandatory routing protocols.
           </p>
 
-          {/* Interactive Routing Animation */}
-          <div className="relative h-44 bg-slate-100/50 dark:bg-slate-900/40 rounded-2xl border border-slate-200/60 dark:border-slate-800/40 flex items-center justify-center p-4 overflow-hidden shadow-inner">
-            {/* Center Lead Node */}
-            <div className="relative z-10 flex flex-col items-center">
-              <motion.div
-                animate={{ scale: [1, 1.15, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30"
-              >
-                <Sparkles className="h-5 w-5" />
-              </motion.div>
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-2 uppercase tracking-wide">
-                Your Lead
-              </span>
-            </div>
-
-            {/* Connecting lines & particles */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none">
-              {/* Left Line */}
-              <line x1="20%" y1="50%" x2="50%" y2="50%" stroke="currentColor" strokeWidth="2" className="text-blue-500/20 dark:text-blue-500/10" strokeDasharray="5 5" />
-              {/* Right Lines */}
-              <line x1="50%" y1="50%" x2="80%" y2="25%" stroke="currentColor" strokeWidth="2" className="text-indigo-500/20 dark:text-indigo-500/10" strokeDasharray="5 5" />
-              <line x1="50%" y1="50%" x2="80%" y2="50%" stroke="currentColor" strokeWidth="2" className="text-purple-500/20 dark:text-purple-500/10" strokeDasharray="5 5" />
-              <line x1="50%" y1="50%" x2="80%" y2="75%" stroke="currentColor" strokeWidth="2" className="text-emerald-500/20 dark:text-emerald-500/10" strokeDasharray="5 5" />
-            </svg>
-
-            {/* Particle Animation */}
-            <motion.div
-              animate={{ x: ["-100px", "100px", "100px"], y: ["0px", "-40px", "-40px"], opacity: [0, 1, 0] }}
-              transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
-              className="absolute w-2 h-2 rounded-full bg-indigo-500 shadow shadow-indigo-400"
-              style={{ left: "50%", top: "50%" }}
-            />
-            <motion.div
-              animate={{ x: ["-100px", "100px", "100px"], y: ["0px", "40px", "40px"], opacity: [0, 1, 0] }}
-              transition={{ repeat: Infinity, duration: 2.2, delay: 0.7, ease: "easeInOut" }}
-              className="absolute w-2 h-2 rounded-full bg-emerald-500 shadow shadow-emerald-400"
-              style={{ left: "50%", top: "50%" }}
-            />
-
-            {/* Providers Nodes */}
-            <div className="absolute right-6 top-6 flex items-center gap-1.5 bg-card-bg border border-border-color px-2.5 py-1.5 rounded-xl shadow-sm text-xs font-semibold">
-              <Building2 className="h-3.5 w-3.5 text-indigo-500" />
-              <span>Provider (Home)</span>
-            </div>
-            <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-1.5 bg-card-bg border border-border-color px-2.5 py-1.5 rounded-xl shadow-sm text-xs font-semibold">
-              <Building2 className="h-3.5 w-3.5 text-purple-500" />
-              <span>Provider (Finance)</span>
-            </div>
-            <div className="absolute right-6 bottom-6 flex items-center gap-1.5 bg-card-bg border border-border-color px-2.5 py-1.5 rounded-xl shadow-sm text-xs font-semibold">
-              <UserCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Best Match Selected</span>
-            </div>
-          </div>
-
-          {/* Trust Badges */}
-          <div className="grid grid-cols-3 gap-4 border-t border-slate-200 dark:border-slate-800/80 pt-6">
-            <div className="flex flex-col items-start gap-1">
-              <Zap className="h-5 w-5 text-amber-500" />
-              <span className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Quick & Easy</span>
-              <span className="text-[10px] text-slate-400 font-semibold leading-tight">Matched in under 2 seconds</span>
-            </div>
-            <div className="flex flex-col items-start gap-1">
-              <ShieldCheck className="h-5 w-5 text-blue-500" />
-              <span className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">100% Free</span>
-              <span className="text-[10px] text-slate-400 font-semibold leading-tight">No subscription fees for users</span>
-            </div>
-            <div className="flex flex-col items-start gap-1">
-              <Award className="h-5 w-5 text-purple-500" />
-              <span className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Best Match</span>
-              <span className="text-[10px] text-slate-400 font-semibold leading-tight">Ranked by score & availability</span>
+          <div className="space-y-3 bg-slate-100/50 dark:bg-slate-900/40 rounded-2xl border border-slate-200/60 dark:border-slate-800/40 p-5 shadow-inner">
+            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">System Allocation Rules</h4>
+            <div className="space-y-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+              <div className="flex gap-2">
+                <span className="font-bold text-blue-500">Service 1:</span>
+                <span>Assigned to <strong>Provider 1</strong>, plus 2 chosen fairly from [Provider 2, 3, 4].</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-bold text-purple-500">Service 2:</span>
+                <span>Assigned to <strong>Provider 5</strong>, plus 2 chosen fairly from [Provider 6, 7, 8].</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-bold text-emerald-500">Service 3:</span>
+                <span>Assigned to <strong>Provider 1 & 4</strong>, plus 1 chosen fairly from [Provider 2, 3, 5, 6, 7, 8].</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right column: Form Card */}
-        <div className="lg:col-span-6">
-          <Card className="glass-card border border-border-color/80 shadow-2xl relative overflow-hidden">
+        <div className="lg:col-span-7">
+          <Card className="glass-card border border-border-color/85 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 to-purple-600" />
             <CardContent className="p-6 sm:p-8 space-y-6">
               <div>
-                <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Submit Your Requirement</h3>
-                <p className="text-xs text-slate-400 mt-1 font-medium">Please provide accurate details to get matched with the correct technician.</p>
+                <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Request Details</h3>
+                <p className="text-xs text-slate-400 mt-1 font-medium">Please enter your request details to check eligibility and allocate instantly.</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -249,15 +206,15 @@ export default function LeadSubmissionPage() {
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleChange}
-                    label="Full Name *"
-                    placeholder="Enter your full name"
+                    label="Customer Full Name *"
+                    placeholder="e.g. Priyanshu Sharma"
                     error={errors.fullName}
                   />
                   <Input
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    label="Phone Number *"
+                    label="Customer Phone Number *"
                     placeholder="10-digit mobile number"
                     error={errors.phone}
                   />
@@ -268,15 +225,15 @@ export default function LeadSubmissionPage() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    label="Email Address *"
-                    placeholder="you@example.com"
+                    label="Customer Email Address *"
+                    placeholder="e.g. customer@example.com"
                     error={errors.email}
                   />
                   <Select
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
-                    label="Service Category *"
+                    label="Select Service *"
                     options={categories}
                   />
                 </div>
@@ -285,8 +242,8 @@ export default function LeadSubmissionPage() {
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  label="Location *"
-                  placeholder="Enter your city or area"
+                  label="City / Location *"
+                  placeholder="e.g. Mumbai, Maharashtra"
                   error={errors.location}
                 />
 
@@ -294,23 +251,11 @@ export default function LeadSubmissionPage() {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  label="Requirements / Details *"
-                  placeholder="Describe your requirement in detail (e.g. leaking faucet, AC servicing, math tutoring details...)"
+                  label="Describe Requirements *"
+                  placeholder="Describe what services you need help with..."
                   rows={4}
                   error={errors.description}
                 />
-
-                <div className="flex items-start gap-2 pt-2">
-                  <input
-                    type="checkbox"
-                    id="terms"
-                    required
-                    className="mt-1 rounded border-slate-300 dark:border-slate-800 text-blue-600 focus:ring-blue-500/20"
-                  />
-                  <label htmlFor="terms" className="text-xs text-slate-400 font-semibold leading-normal cursor-pointer select-none">
-                    I agree to the <span className="text-primary-color hover:underline">Terms & Conditions</span> and <span className="text-primary-color hover:underline">Privacy Policy</span>.
-                  </label>
-                </div>
 
                 <Button
                   type="submit"
@@ -318,7 +263,7 @@ export default function LeadSubmissionPage() {
                   className="w-full py-3 rounded-xl mt-4 cursor-pointer text-sm sm:text-base font-bold shadow-lg"
                   isLoading={isSubmitting}
                 >
-                  Submit & Match Lead
+                  Submit Request
                 </Button>
               </form>
             </CardContent>
@@ -354,21 +299,14 @@ export default function LeadSubmissionPage() {
               </motion.div>
 
               <div className="space-y-2">
-                <h2 className="text-2xl font-bold tracking-tight text-white">Lead Successfully Captured!</h2>
+                <h2 className="text-2xl font-bold tracking-tight text-white">Request Successfully Routed!</h2>
                 <p className="text-sm text-slate-400 font-medium max-w-xs mx-auto">
-                  Our system is processing matching scores. Redirecting you to the allocation summary...
+                  Your lead has been registered and distributed to exactly 3 provider partners in our network.
                 </p>
               </div>
 
               <div className="px-4 py-2 border border-slate-800 bg-slate-900/50 rounded-xl text-xs text-slate-400 font-semibold">
                 Lead Reference ID: <span className="font-bold text-white tracking-wider">{createdLeadId}</span>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs text-indigo-400 font-bold justify-center mt-2">
-                <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" />
-                <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.4s]" />
-                Searching active provider quotas...
               </div>
             </motion.div>
           </motion.div>
